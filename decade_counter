@@ -1,0 +1,28 @@
+class decade_counter(SIZE: Int) extends Module { 
+  val io = IO(new Bundle {
+    val load_n = Input(Bool)
+    val clear_n = Input(Bool)
+    val updown = Input(Bool)
+    val load_data = Input(UInt(SIZE-1.W))
+    val out = Output(UInt(SIZE-1.W))
+  })
+  when(!io.load_n){
+      io.q := io.load_data
+  }.elsewhen(!clear_n){
+      io.q := 0.U
+  }.otherwise{
+      when(updown){
+          io.q := (io.q + 1.U)%10.U
+      }.otherwise{
+          when(io.q == 0.U){
+              io.q := 9.U
+          }.otherwise{
+              io.q := q - 1.U
+          }
+      }
+  }
+}
+
+// Let's now generate modules with different widths
+println(getVerilog(new PassthroughGenerator(10)))
+println(getVerilog(new PassthroughGenerator(20)))
