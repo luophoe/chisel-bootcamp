@@ -1,28 +1,28 @@
-class decade_counter(SIZE: Int) extends Module { 
+// Chisel Code, but pass in a parameter to set widths of ports
+class decade_counter() extends Module { 
   val io = IO(new Bundle {
-    val load_n = Input(Bool)
-    val clear_n = Input(Bool)
-    val updown = Input(Bool)
-    val load_data = Input(UInt(SIZE-1.W))
-    val out = Output(UInt(SIZE-1.W))
+    val load_n = Input(UInt(1.W))
+    val clear_n = Input(UInt(1.W))
+    val updown = Input(UInt(1.W))
+    val load_data = Input(UInt(3.W))
+    val q = Output(UInt(3.W))
   })
-  when(!io.load_n){
+  when(io.load_n === 0.U){
       io.q := io.load_data
-  }.elsewhen(!clear_n){
+  }.elsewhen(io.clear_n === 0.U){
       io.q := 0.U
   }.otherwise{
-      when(updown){
+      when(io.updown === 1.U){
           io.q := (io.q + 1.U)%10.U
       }.otherwise{
-          when(io.q == 0.U){
+          when(io.q === 0.U){
               io.q := 9.U
           }.otherwise{
-              io.q := q - 1.U
+              io.q := io.q - 1.U
           }
       }
   }
 }
 
 // Let's now generate modules with different widths
-println(getVerilog(new PassthroughGenerator(10)))
-println(getVerilog(new PassthroughGenerator(20)))
+println(getVerilog(new decade_counter()))
