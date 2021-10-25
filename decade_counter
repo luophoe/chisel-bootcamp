@@ -71,18 +71,19 @@ class counter() extends Module {
   val io = IO(new Bundle {
     val clk = Input(UInt(1.W))
     val reset = Input(UInt(1.W))
+    val in = Input(UInt(4.W))
     val out = Output(UInt(4.W))
   })
-    
-  val r1 = RegInit(0.U(4.W))    
+        
   when(io.clk === 1.U){
        when(io.reset === 1.U){
-           r1 := 0.U
+           io.out := 0.U
        }.otherwise{
-           r1 := r1 + 1.U
+           io.out := io.in + 1.U
        }
+  }.otherwise{
+      io.out := io.in
   }
-  io.out := r1
 }
 
 println(getVerilog(new counter()))
