@@ -1,30 +1,37 @@
 // Chisel Code to Verilog
-class decade_counter() extends Module { 
+// Chisel Code: Declare a new module definition
+class decade_counter() extends Module {
   val io = IO(new Bundle {
+    val clock = Input(UInt(1.W))
     val load_n = Input(UInt(1.W))
     val clear_n = Input(UInt(1.W))
     val updown = Input(UInt(1.W))
-    val load_data = Input(UInt(3.W))
-    val q = Output(UInt(3.W))
+    val load_data = Input(UInt(4.W))
+    val out = Output(UInt(4.W))
   })
-  when(io.load_n === 0.U){
-      io.q := io.load_data
-  }.elsewhen(io.clear_n === 0.U){
-      io.q := 0.U
-  }.otherwise{
-      when(io.updown === 1.U){
-          io.q := (io.q + 1.U)%10.U
-      }.otherwise{
-          when(io.q === 0.U){
-              io.q := 9.U
-          }.otherwise{
-              io.q := io.q - 1.U
-          }
-      }
+ 
+  val out = RegInit(0.U(4.W))
+    
+  when(io.clock === 1.U){
+       when(io.load_n === 0.U){
+           out := io.load_data
+       }.elsewhen(io.clear_n === 0.U){
+           out := 0.U
+       }.otherwise{
+           when(io.updown === 1.U){
+               out := (out+1.U)%10.U
+           }.otherwise{
+               when(out === 0.U){
+                   out := 9.U
+               }.otherwise{
+                   out := out - 1.U
+               }
+           }
+       }
   }
+  io.out := out
 }
 
-// Let's now generate modules with different widths
 println(getVerilog(new decade_counter()))
 
 
@@ -61,29 +68,3 @@ test(new decade_counter()) { c =>
     step(1)
     c.io.load_n.poke(1.U)
 }
-
-------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------
-
-// Chisel Code: Declare a new module definition
-class counter() extends Module {
-  val io = IO(new Bundle {
-    val clk = Input(UInt(1.W))
-    val reset = Input(UInt(1.W))
-    val in = Input(UInt(4.W))
-    val out = Output(UInt(4.W))
-  })
-        
-  when(io.clk === 1.U){
-       when(io.reset === 1.U){
-           io.out := 0.U
-       }.otherwise{
-           io.out := io.in + 1.U
-       }
-  }.otherwise{
-      io.out := io.in
-  }
-}
-
-println(getVerilog(new counter()))
